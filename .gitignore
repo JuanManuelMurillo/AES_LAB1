@@ -1,0 +1,27 @@
+# Compilación
+target/
+*.class
+
+# Maven
+.mvn/timing.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
