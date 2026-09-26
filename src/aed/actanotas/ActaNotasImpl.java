@@ -76,6 +76,17 @@ public class ActaNotasImpl implements ActaNotas{
 		}
 		return c;
 	}
+	private int buscarMatricula(String matricula) {
+		int posicion = 0;
+		while(posicion < calificaciones.size()) {
+			if(calificaciones.get(posicion).matricula.equals(matricula)) {
+				return posicion;
+			}
+			posicion++;
+		}
+		return -1;
+		
+	}
 
 	@Override
 	public ActaNotas updateCalificacion(Calificacion calificacion) {
