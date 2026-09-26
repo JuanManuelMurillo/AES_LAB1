@@ -1,11 +1,14 @@
 package aed.actanotas;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.function.Function;
 
 import es.upm.aedlib.Pair;
 import es.upm.aedlib.indexedlist.ArrayIndexedList;
 import es.upm.aedlib.indexedlist.IndexedList;
+
+import java.util.Map;
 
 public class ActaNotasImpl implements ActaNotas{
 	String asignatura;
@@ -103,8 +106,20 @@ public class ActaNotasImpl implements ActaNotas{
 
 	@Override
 	public ActaNotas deleteCalificacion(String matricula) {
-		// TODO Auto-generated method stub
-		return null;
+		if (matricula == null) {
+			throw new IllegalArgumentException();
+		}
+
+		int posicion = buscarMatricula(matricula);
+
+		if (posicion == -1) {
+			throw new IllegalStateException();
+		}
+
+		Calificacion calificacion = calificaciones.get(posicion);
+		calificaciones.remove(calificacion);
+
+		return this;
 	}
 
 	@Override
@@ -123,15 +138,72 @@ public class ActaNotasImpl implements ActaNotas{
 
 	@Override
 	public IndexedList<Pair<String, Integer>> alumnosPorGrupo() {
-		// TODO Auto-generated method stub
-		return null;
+
+		Map<String, Integer> contadorGrupos = new HashMap<>();
+
+		for (Calificacion calificacion : calificaciones) {
+			String grupo = calificacion.grupo();
+
+			contadorGrupos.put(
+				grupo,
+				contadorGrupos.getOrDefault(grupo, 0) + 1
+			);
+		}
+
+		IndexedList<Pair<String, Integer>> alumnos = new ArrayIndexedList<>();
+
+		for (Map.Entry<String, Integer> entry : contadorGrupos.entrySet()) {
+			alumnos.add(alumnos.size(), new Pair<String, Integer>(entry.getKey(), entry.getValue()));
+		}
+
+		return alumnos;
 	}
 
 	@Override
-	public IndexedList<Calificacion> getCalificaciones(Function<Calificacion, Boolean> filter,
-			Comparator<Calificacion> cmp) {
-		// TODO Auto-generated method stub
-		return null;
+	public IndexedList<Calificacion>
+		getCalificaciones(Function<Calificacion,Boolean> filter,
+						Comparator<Calificacion> cmp){
+
+    IndexedList<Calificacion> resultado = new ArrayIndexedList<>();
+
+    for (Calificacion calificacion : calificaciones) {
+        if (filter == null || filter.apply(calificacion)) {
+            resultado.add(resultado.size(), calificacion);
+        }
+    }
+
+    if (cmp == null) {
+        cmp = (c1, c2) -> c1.matricula().compareTo(c2.matricula());
+    }
+
+    bubbleSort(resultado, cmp);
+
+    return resultado;
+	}
+
+	private void bubbleSort(IndexedList<Calificacion> lista, Comparator<Calificacion> cmp) {
+
+		for (int i = 0; i < lista.size() - 1; i++) {
+
+			boolean intercambiado = false;
+
+			for (int j = 0; j < lista.size() - 1 - i; j++) {
+
+				if (cmp.compare(lista.get(j), lista.get(j + 1)) > 0) {
+
+					Calificacion temp = lista.get(j);
+
+					lista.set(j, lista.get(j + 1));
+					lista.set(j + 1, temp);
+
+					intercambiado = true;
+				}
+			}
+
+			if (!intercambiado) {
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -154,8 +226,5 @@ public class ActaNotasImpl implements ActaNotas{
 		}
 		return "ACTA -> asignatura: " + asignatura + ", anyo: " + anyo + ", convocatoria: " + convocatoria;
 	}
-	
-	
-	
 
 }
