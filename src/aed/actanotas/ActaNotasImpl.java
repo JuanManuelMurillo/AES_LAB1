@@ -1,128 +1,143 @@
 package aed.actanotas;
 
-import java.util.function.Function;
 import java.util.Comparator;
+import java.util.function.Function;
+
 import es.upm.aedlib.Pair;
+import es.upm.aedlib.indexedlist.ArrayIndexedList;
 import es.upm.aedlib.indexedlist.IndexedList;
 
-/**
- * Métodos para un acta: una coleccion de notas de alumnos de una asignatura. Una acta
- * esta asociada a una asignatura (String), un año (int), una convocatoria (julio o no),
- * y una nota minima para ser aprobado.
- */
-public class ActaNotasImpl implements ActaNotas {
+public class ActaNotasImpl implements ActaNotas{
+	String asignatura;
+	double notaMinimaAprobado;
+	int anyo;
+	boolean esConvocatoriaExtraordinaria;
+	private IndexedList<Calificacion> calificaciones;
 
-  /**
-   * Devuelve el nombre de la asignatura.
-   * @return el nombre de la asignatura.
-   */
-  @Override
-  public String asignatura(){
-    return "";
-  }
+	public ActaNotasImpl(String asignatura, double notaMinimaAprobado, int anyo, boolean esConvocatoriaExtraordinaria) {
+		this.asignatura = asignatura;
+		this.notaMinimaAprobado = notaMinimaAprobado;
+		this.anyo = anyo;
+		this.esConvocatoriaExtraordinaria = esConvocatoriaExtraordinaria;
+		this.calificaciones = new ArrayIndexedList<Calificacion>();
+		}
 
-  /**
-   * Devuelve el año de las 
-   * @return devuelve el año para las notas del acta.
-   */
-  @Override
-  public int anyo(){
-    return 0;
-  }
-  
-  /**
-   * Devuelve true si el acta corresponde a una convocatoria extraordinaria (julio)
-   * y false en caso contrario.
-   * @return devuelve true si el acta corresponde a una convocatoria extraordinaria.
-   */
-  @Override
-  public boolean esConvocatoriaExtraordinaria(){
-    return false;
-  }
-  
-  /**
-   * Devuelve la nota minima para ser aprobado.
-   * @return devuelve la nota minima para ser aprobado.
-   */
-  @Override
-  public double minNotaAprobado(){
-    return 0;
-  }
+	@Override
+	public String asignatura() {
+		return asignatura;
+	}
 
-	/**
-	 * Añade una calificacion al acta.
-	 * @throws IllegalStateException si una calificacion de la misma matricula ya existe
-   * en el acta.
-   * @throws IllegalArgumentException si el nombre, matricula, o grupo es null,
-   * o si nota < 0.0 o nota > 10.0.
-   * @return devuelve el acta.
-	 */
-    @Override
-	public ActaNotas addCalificacion(String nombre, String matricula, String grupo, double nota);
+	@Override
+	public int anyo() {
+		return anyo;
+	}
 
-	/**
-	 * Devuelve la calificacion (unica) para el alumno identificado por su matricula (el parametro).
-	 * @return devuelve la calificacion (unica) para el alumno identificado por su matricula (el parametro,
-   * o null si no hay una calificacion en el acta con la matricula dada.
-	 * @throws IllegalArgumentException si la matricula es null.
-	 */
-    @Override
-	public Calificacion getCalificacion(String matricula);
+	@Override
+	public boolean esConvocatoriaExtraordinaria() {
+		return esConvocatoriaExtraordinaria;
+	}
 
-	/**
-	 * Sustituye una calificacion existente dentro del acta
-   * con la nueva (el parametro calificacion).
-	 * @throws IllegalArgumentException si la calificacion es null.
-	 * @throws IllegalStateException si ningun calificacion existe en el acta con
-   * la matricula del parametro calificacion.
-   * @return devuelve el acta.
-	 */
-    @Override
-	public ActaNotas updateCalificacion(Calificacion calificacion);
+	@Override
+	public double minNotaAprobado() {
+		return notaMinimaAprobado;
+	}
 
-	/**
-	 * Borra la calificacion para el alumno identificado por la matricula (el parametro).
-	 * @throws IllegalArgumentException si la matricula es null.
-	 * @throws IllegalStateException si en el acta no existe ninguna calificacion con
-   * la matricula (el parametro).
-	 */
-    @Override
-	public ActaNotas deleteCalificacion(String matricula);
+	@Override
+	public ActaNotas addCalificacion(String nombre, String matricula, String grupo, double nota) {
+		Calificacion c = new Calificacion(nombre, matricula, grupo, nota);
+		if(c.nombreAlumno == null || c.matricula == null || grupo == null || nota < 0.0 || nota >10.0 ) {
+			throw new IllegalArgumentException();
+		}
+		int i = 0;
+		while(i<calificaciones.size()) {
+			if(calificaciones.get(i).matricula.equals(c.matricula)) {
+				throw new IllegalStateException();
+			}
+			i++;
+		}
+		calificaciones.add(calificaciones.size(), c);
+		
+		return this;
+	}
 
+	@Override
+	public Calificacion getCalificacion(String matricula) {
+		if(matricula == null) {
+			throw new IllegalArgumentException();		
+		}
+		int i = 0;
+		Calificacion c = null;
+		while(i < calificaciones.size()) {
+			if(calificaciones.get(i).matricula.equals(matricula)) {
+				c = calificaciones.get(i);
+			}
+			
+			i++;
+		}
+		return c;
+	}
 
-  /**
-   * Devuelve la nota media de todas las calificaciones en el acta (suma notas / numero de calificaciones).
-   * @return devuelve la nota media de todas las calificaciones en el acta.
-   * @throws IllegalStateException si no hay calificaciones en el acta.
-   */
-  @Override
-  public double notaMedia(){
-    return 0;
-  }
+	@Override
+	public ActaNotas updateCalificacion(Calificacion calificacion) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  /**
-   * Devuelve una lista indexada con pares de un nombre de grupo y el numero de calificaciones
-   * para alumnos de este grupo que hay en el acta.
-   * Notad que el orden de los pares en la lista indexada no esta definido.
-   * @return devuelve una lista indexada con pares de un nombre de grupo y el numero de calificaciones
-   * con alumnos de este grupo que hay en el acta.
-   */
-  @Override
-  public IndexedList<Pair<String,Integer>> alumnosPorGrupo();
+	@Override
+	public ActaNotas deleteCalificacion(String matricula) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  /**
-   * Devuelve una lista indexada con las calificaciones (del acta) seleccionadas por
-   * el argumento filtro, y ordenada segun el parametro Comparator cmp.
-   * Es decir, el método devuelve todas las calificaciones del acta que el 
-   * filtro accepta (devuelve true), y ordenadas segun el comparador cmp.
-   * Si el parametro filtro es null no se filtra ninguna calificacion (todas estan devueltas),
-   * y si el parametro cmp es null se debe usar el comparador que compara las matriculas de
-   * las calificaciones (segun la comparacion normal -- compareTo -- de String).
-   * @return devuelve una lista indexada con las calificaciones (del acta) seleccionadas por
-   * el argumento filtro, y ordenada segun el parametro comparator cmp.
-   */
-  @Override
-  public IndexedList<Calificacion>
-    getCalificaciones(Function<Calificacion,Boolean> filter,
-                      Comparator<Calificacion> cmp);
+	@Override
+	public double notaMedia() {
+		if(calificaciones.isEmpty()) {
+			throw new IllegalStateException();
+		}
+		int i = 0;
+		double media = 0;
+		while(i<calificaciones.size()) {
+			media+=calificaciones.get(i).nota;
+			i++;
+		}
+		return media/calificaciones.size();
+	}
+
+	@Override
+	public IndexedList<Pair<String, Integer>> alumnosPorGrupo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IndexedList<Calificacion> getCalificaciones(Function<Calificacion, Boolean> filter,
+			Comparator<Calificacion> cmp) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		else if (obj instanceof ActaNotasImpl) {
+			ActaNotasImpl other = (ActaNotasImpl) obj;
+			return asignatura.equals(other.asignatura()) && anyo == other.anyo() && esConvocatoriaExtraordinaria == other.esConvocatoriaExtraordinaria();
+		}else return false;
+	}
+
+	@Override
+	public String toString() {
+		String convocatoria;
+		if(esConvocatoriaExtraordinaria) {
+			convocatoria = "extraordinaria";
+		}else {
+			convocatoria = "ordinaria";
+		}
+		return "ACTA -> asignatura: " + asignatura + ", anyo: " + anyo + ", convocatoria: " + convocatoria;
+	}
+	
+	
+	
+
 }
