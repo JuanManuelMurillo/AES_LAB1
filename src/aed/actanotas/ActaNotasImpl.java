@@ -90,8 +90,15 @@ public class ActaNotasImpl implements ActaNotas{
 
 	@Override
 	public ActaNotas updateCalificacion(Calificacion calificacion) {
-		// TODO Auto-generated method stub
-		return null;
+		if(calificacion == null) {
+			throw new IllegalArgumentException();
+		}
+		int posicion = buscarMatricula(calificacion.matricula);
+		if(posicion == -1) {
+			throw new IllegalStateException();
+		}
+		calificaciones.set(posicion, calificacion);
+		return this;
 	}
 
 	@Override
